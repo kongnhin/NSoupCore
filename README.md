@@ -15,8 +15,10 @@ Ported to .NET Core by Justin Kirk
 - Sanitize HTML sent from untrusted sources.
 - Manipulate HTML documents.
 
-## Install
+## Installation
 
-To install NSoupCore, run the following command in the Package Manager Console
+To install NSoupCore, run the following command in [NuGet Package Manager Console](http://docs.nuget.org/docs/start-here/using-the-package-manager-console).
 
+```
 PM> Install-Package NSoupCore
+```
