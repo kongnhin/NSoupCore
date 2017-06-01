@@ -5,6 +5,40 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="htmltests\baidu-cn-home.html" />
+    <None Remove="htmltests\baidu-variant.html" />
+    <None Remove="htmltests\google-ipod.html" />
+    <None Remove="htmltests\meta-charset-1.html" />
+    <None Remove="htmltests\meta-charset-2.html" />
+    <None Remove="htmltests\meta-charset-3.html" />
+    <None Remove="htmltests\news-com-au-home.html" />
+    <None Remove="htmltests\nyt-article-1.html" />
+    <None Remove="htmltests\README" />
+    <None Remove="htmltests\smh-biz-article-1.html" />
+    <None Remove="htmltests\thumb.jpg" />
+    <None Remove="htmltests\xml-test.xml" />
+    <None Remove="htmltests\yahoo-article-1.html" />
+    <None Remove="htmltests\yahoo-jp.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="htmltests\baidu-cn-home.html" />
+    <EmbeddedResource Include="htmltests\baidu-variant.html" />
+    <EmbeddedResource Include="htmltests\google-ipod.html" />
+    <EmbeddedResource Include="htmltests\meta-charset-1.html" />
+    <EmbeddedResource Include="htmltests\meta-charset-2.html" />
+    <EmbeddedResource Include="htmltests\meta-charset-3.html" />
+    <EmbeddedResource Include="htmltests\news-com-au-home.html" />
+    <EmbeddedResource Include="htmltests\nyt-article-1.html" />
+    <EmbeddedResource Include="htmltests\README" />
+    <EmbeddedResource Include="htmltests\smh-biz-article-1.html" />
+    <EmbeddedResource Include="htmltests\thumb.jpg" />
+    <EmbeddedResource Include="htmltests\xml-test.xml" />
+    <EmbeddedResource Include="htmltests\yahoo-article-1.html" />
+    <EmbeddedResource Include="htmltests\yahoo-jp.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.11" />
     <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />

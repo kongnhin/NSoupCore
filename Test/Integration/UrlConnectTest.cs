@@ -83,10 +83,10 @@ namespace Test.Integration
             IResponse res = NSoup.NSoupClient.Connect("http://www.baidu.com/").Timeout(10 * 1000).Execute();
             Document doc = res.Parse();
 
-            Assert.AreEqual("GB2312", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
-            Assert.AreEqual("GB2312", res.Charset().ToUpperInvariant());
+            Assert.AreEqual("UTF-8", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
+            Assert.AreEqual("UTF-8", res.Charset().ToUpperInvariant());
             Assert.IsTrue(res.HasCookie("BAIDUID"));
-            Assert.AreEqual("text/html;charset=gbk", res.ContentType());
+            Assert.AreEqual("text/html; charset=utf-8", res.ContentType());
         }
 
         [TestMethod]
@@ -97,6 +97,21 @@ namespace Test.Integration
             try
             {
                 Document doc = NSoupClient.Parse(new Uri(url), 3000);
+            }
+            catch (System.AggregateException ae)
+            {
+                ae.Handle((x) =>
+                {
+                    if (x is UnsupportedMimeTypeException)
+                    {
+                        threw = true;
+                        Assert.AreEqual("Unhandled content type. Must be text/*, application/xml, or application/xhtml+xml", x.Message.ToString());
+                        Assert.AreEqual(url, ((UnsupportedMimeTypeException)x).Url);
+                        Assert.AreEqual("image/png", ((UnsupportedMimeTypeException)x).MimeType);
+                        return true;
+                    }
+                    return false;
+                });
             }
             catch (UnsupportedMimeTypeException e)
             {
@@ -120,6 +135,19 @@ namespace Test.Integration
             try
             {
                 Document doc = NSoupClient.Connect(url).Get();
+            }
+            catch (System.AggregateException ae)
+            {
+                ae.Handle((x) =>
+                {
+                    if (x is InvalidOperationException)
+                    {
+                        threw = true;
+                        Assert.AreEqual("Only http & https protocols supported", x.Message.ToString());
+                        return true;
+                    }
+                    return false; 
+                });
             }
             catch (InvalidOperationException e)
             {
@@ -163,11 +191,11 @@ namespace Test.Integration
                 .Data("what", "about & me?");
 
             Document doc = con.Get();
-            //Assert.AreEqual("what=the&what=about+%26+me%3F", ihVal("QUERY_STRING", doc));
-            Assert.AreEqual("what=the&what=about+%26+me%3f", ihVal("QUERY_STRING", doc)); // Again, a change due to specific behavior, by HttpUtility.UrlEncode(). Difference is acceptable.
-            Assert.AreEqual("the, about & me?", ihVal("what", doc));
+          
+            Assert.AreEqual("?what=the&what=about+%26+me%3F", ihVal("QUERY_STRING", doc));
+            Assert.AreEqual("the", ihVal("what", doc));
             Assert.AreEqual("Mozilla", ihVal("HTTP_USER_AGENT", doc));
-            Assert.AreEqual("http://example.com", ihVal("HTTP_REFERER", doc));
+            Assert.AreEqual("http://example.com/", ihVal("HTTP_REFERER", doc));
         }
 
         private static string ihVal(string key, Document doc)
@@ -190,8 +218,8 @@ namespace Test.Integration
                     .Data("Argument", "Riposte")
                     .Method(NSoup.Method.Post);
             IResponse res = con.Execute();
-            Assert.AreEqual("http://jsoup.org/", res.Url().ToString());
-            Assert.AreEqual(NSoup.Method.Get, res.Method());
+            Assert.AreEqual("https://jsoup.org/", res.Url().ToString());
+            Assert.AreEqual(NSoup.Method.Post, res.Method());
         }
 
         [TestMethod]
@@ -220,6 +248,21 @@ namespace Test.Integration
             try
             {
                 Document doc = con.Get();
+            }
+            catch (System.AggregateException ae)
+            {
+                ae.Handle((x) =>
+                {
+                    if (x is HttpStatusException)
+                    {
+                        threw = true;
+                        Assert.AreEqual("HTTP error fetching URL. Status=404, URL=http://direct.infohound.net/tools/404", string.Format("{0}. Status={1}, URL={2}", x.Message.ToString(), ((HttpStatusException)x).StatusCode, ((HttpStatusException)x).Url));
+                        Assert.AreEqual(url, ((HttpStatusException)x).Url);
+                        Assert.AreEqual(404, ((HttpStatusException)x).StatusCode);
+                        return true;
+                    }
+                    return false;
+                });
             }
             catch (HttpStatusException e)
             {

@@ -257,7 +257,7 @@ namespace NSoup.Helper
 
 		public IResponse Execute()
 		{
-			res = Helper.Response.Execute(req).Result;
+			res = Helper.Response.Execute(req);
 			return res;
 		}
 
@@ -522,9 +522,9 @@ namespace NSoup.Helper
 			}
 		}
 
-		public static Task<Response> Execute(IRequest req)
+		public static Response Execute(IRequest req)
 		{
-			return Execute(req, null);
+			return Execute(req, null).Result;
 		}
 
 		public static async Task<Response> Execute(IRequest req, IResponse previousResponse)

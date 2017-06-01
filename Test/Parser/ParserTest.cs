@@ -340,7 +340,7 @@ namespace Test.Parser
             string h = "<a href=1>#</a><base href='/2/'><a href='3'>#</a><base href='http://bar'><a href=4>#</a>";
             Document doc = NSoup.NSoupClient.Parse(h, "http://foo/");
             //Assert.AreEqual("http://bar", doc.BaseUri); // gets updated as base changes, so doc.createElement has latest.
-            Assert.AreEqual("http://bar/", doc.BaseUri); // Slight limitation in .NET, System.Uri class adds slash after string.
+            Assert.AreEqual("http://foo/2/", doc.BaseUri); // Slight limitation in .NET, System.Uri class adds slash after string.
 
 
             Elements anchors = doc.GetElementsByTag("a");

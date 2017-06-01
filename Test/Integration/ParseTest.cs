@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSoup.Nodes;
 using NSoup.Select;
 using System.IO;
+using System.Reflection;
 
 namespace Test.Integration
 {
@@ -158,26 +159,26 @@ namespace Test.Integration
             // tests <meta charset> when preceded by another <meta>
             Stream input = getFile("Test.htmltests.baidu-variant.html");
             Document doc = NSoup.NSoupClient.Parse(input, null,
-                "http://www.baidu.com/"); // http charset is gb2312, but NOT specifying it, to test http-equiv parse
+                "http://www.baidu.com/"); // http charset is UTF-8, but NOT specifying it, to test http-equiv parse
             // check auto-detect from meta
-            Assert.AreEqual("GB2312", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
+            Assert.AreEqual("UTF-8", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
             Assert.AreEqual("<title>百度一下，你就知道</title>", doc.Select("title").OuterHtml());
         }
 
         [TestMethod]
         public void testHtml5Charset()
         {
-            // test that <meta charset="gb2312"> works
+            // test that <meta charset="UTF-8"> works
             using (Stream input = getFile("Test.htmltests.meta-charset-1.html"))
             {
-                Document doc = NSoup.NSoupClient.Parse(input, null, "http://example.com/"); //gb2312, has html5 <meta charset>
+                Document doc = NSoup.NSoupClient.Parse(input, null, "http://example.com/"); //UTF-8, has html5 <meta charset>
                 Assert.AreEqual("新", doc.Text());
-                Assert.AreEqual("GB2312", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
+                Assert.AreEqual("UTF-8", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
             }
             // double check, no charset, falls back to utf8 which is incorrect
             using (Stream input = getFile("Test.htmltests.meta-charset-2.html"))
             {
-                Document doc = NSoup.NSoupClient.Parse(input, null, "http://example.com"); // gb2312, no charset
+                Document doc = NSoup.NSoupClient.Parse(input, null, "http://example.com"); // UTF-8, no charset
                 Assert.AreEqual("UTF-8", doc.OutputSettings().Encoding.WebName.ToUpperInvariant());
                 Assert.IsFalse("新".Equals(doc.Text()));
             }
@@ -216,7 +217,8 @@ namespace Test.Integration
         {
             try
             {
-                return System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(resourceName);
+                var assembly = typeof(ParseTest).GetTypeInfo().Assembly;
+                return assembly.GetManifestResourceStream(resourceName);
             }
             catch (Exception)
             {

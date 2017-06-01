@@ -4,6 +4,7 @@ using NSoup.Parse;
 using NSoup.Nodes;
 using NSoup;
 using System.IO;
+using System.Reflection;
 
 namespace Test.Parser
 {
@@ -99,7 +100,8 @@ namespace Test.Parser
         {
             try
             {
-                return System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(resourceName);
+                var assembly = typeof(XmlTreeBuilderTest).GetTypeInfo().Assembly;
+                return assembly.GetManifestResourceStream(resourceName);
             }
             catch (Exception)
             {

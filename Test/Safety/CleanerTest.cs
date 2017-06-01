@@ -253,7 +253,7 @@ namespace Test.Safety
 
             Assert.AreEqual("<div><p>&bernou;</p></div>", customOut);
             Assert.AreEqual("<div>\n" +
-                " <p>ג„¬</p>\n" +
+                " <p>ℬ</p>\n" +
                 "</div>", defaultOut);
 
             os.SetEncoding(Encoding.ASCII);

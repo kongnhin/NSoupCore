@@ -3,6 +3,7 @@ using NSoup.Parse;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -160,7 +161,8 @@ namespace NSoup.Nodes
         {
             Dictionary<string, char> entities = new Dictionary<string, char>();
 
-            using (Stream stream = System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(resourceName))
+            var assembly = typeof(Entities).GetTypeInfo().Assembly;
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))
             {
                 string line = reader.ReadLine();

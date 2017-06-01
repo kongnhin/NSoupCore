@@ -532,6 +532,11 @@ namespace NSoup.Nodes
         {
             get
             {
+                if (ParentNode == null)
+                {
+                    return null;
+                }
+
                 IList<Element> siblings = Parent.Children;
                 int index = siblings.IndexOf(this);
 
@@ -554,7 +559,11 @@ namespace NSoup.Nodes
         {
             get
             {
-                // todo: should firstSibling() exclude this?
+                if (ParentNode == null)
+                {
+                    return null;
+                }
+
                 IList<Element> siblings = Parent.Children;
                 return siblings.Count > 1 ? siblings[0] : null;
             }
@@ -585,6 +594,11 @@ namespace NSoup.Nodes
         {
             get
             {
+                if (ParentNode == null)
+                {
+                    return null;
+                }
+
                 IList<Element> siblings = Parent.Children;
                 return siblings.Count > 1 ? siblings[siblings.Count - 1] : null;
             }
