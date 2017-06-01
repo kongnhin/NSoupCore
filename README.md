@@ -4,6 +4,7 @@
 NSoup is a .NET Core 1.1 port of the jsoup (https://github.com/jhy/jsoup) HTML parser and sanitizer originally written in Java.
 
 jsoup originally written by [Jonathan Hedley](https://github.com/jhy).
+
 Ported to .NET Framework by Amir Grozki (https://github.com/GeReV/NSoup)
 Ported to .NET Core by Justin Kirk
 
