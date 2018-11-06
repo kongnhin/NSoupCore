@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace NSoup.Parse
@@ -112,15 +108,15 @@ namespace NSoup.Parse
                 // scan to first instance of startchar:
                 if (startChar != _input[offset])
                 {
-                    while (++offset < _length && startChar != _input[offset]);
+                    while (++offset < _length && startChar != _input[offset]) ;
                 }
                 if (offset < _length)
                 {
                     int i = offset + 1;
                     int last = i + seq.Length - 1;
-                    
-                    for (int j = 1; i < last && seq[j] == _input[i]; i++, j++) ;
-                    
+
+                    for (int j = 1; i < last && _input.Length > i && seq[j] == _input[i]; i++, j++) ;
+
                     if (i == last) // found full sequence
                     {
                         return offset - _pos;
@@ -196,7 +192,7 @@ namespace NSoup.Parse
             while (_pos < _length)
             {
                 char c = _input[_pos];
-                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || Char.IsLetter(c))
                 {
                     _pos++;
                 }
@@ -243,7 +239,8 @@ namespace NSoup.Parse
         public string ConsumeHexSequence()
         {
             int start = _pos;
-            while (_pos < _length) {
+            while (_pos < _length)
+            {
                 char c = _input[_pos];
                 if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
                 {
@@ -345,7 +342,7 @@ namespace NSoup.Parse
                 return false;
             }
             char c = _input[_pos];
-            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || Char.IsLetter(c);
         }
 
         public bool MatchesDigit()

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using NSoup.Helper;
+using NSoup.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using NSoup.Nodes;
-using NSoup.Helper;
 
 namespace NSoup.Parse
 {
@@ -184,6 +183,12 @@ namespace NSoup.Parse
                         }
                         else if (StringUtil.In(name, "noframes", "style"))
                         {
+                            // Making sure that the node after end-closed is not raw-text
+                            if (((Token.Tag)t).IsSelfClosing) //TODO: Steffen
+                            {
+                                tb.Error(this);
+                                return false;
+                            }
                             HandleRawText(start, tb);
                         }
                         else if (name.Equals("noscript"))
@@ -196,6 +201,14 @@ namespace NSoup.Parse
                         {
                             // skips some script rules as won't execute them
                             tb.Insert(start);
+
+                            // Making sure that the node after end-closed is not raw-text
+                            if (((Token.Tag)t).IsSelfClosing) //TODO: Steffen
+                            {
+                                tb.Error(this);
+                                return false;
+                            }
+
                             tb.Tokeniser.Transition(TokeniserState.ScriptData);
                             tb.MarkInsertionMode();
                             tb.Transition(Text);
@@ -378,7 +391,7 @@ namespace NSoup.Parse
                             tb.Error(this);
                             return false;
                         }
-                        else if (IsWhitespace(c))
+                        else if (tb.FramesetOk() && IsWhitespace(c)) //TODO: Steffen
                         {
                             tb.ReconstructFormattingElements();
                             tb.Insert(c);
@@ -671,9 +684,11 @@ namespace NSoup.Parse
                         }
                         else if (name.Equals("image"))
                         {
-                            // we're not supposed to ask.
-                            startTag.Name("img");
-                            return tb.Process(startTag);
+                            //Steffen
+                            if (tb.GetFromStack("svg") == null)
+                                return tb.Process(startTag.Name("img")); // change <image> to <img>, unless in svg
+                            else
+                                tb.Insert(startTag);
                         }
                         else if (name.Equals("isindex"))
                         {
@@ -1062,6 +1077,7 @@ namespace NSoup.Parse
                                 }
 
                                 Element adopter = new Element(Tag.ValueOf(name), tb.BaseUri);
+                                adopter.Attributes.AddRange(formatEl.Attributes); //TODO: Steffen
                                 Node[] childNodes = furthestBlock.ChildNodes.ToArray();
                                 foreach (Node childNode in childNodes)
                                 {

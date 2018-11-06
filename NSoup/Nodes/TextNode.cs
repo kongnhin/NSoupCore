@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using NSoup.Helper;
+using System;
 using System.Text;
-using System.Text.RegularExpressions;
-using NSoup.Helper;
 
 namespace NSoup.Nodes
 {
@@ -105,7 +102,7 @@ namespace NSoup.Nodes
 
             string head = GetWholeText().Substring(0, offset);
             string tail = GetWholeText().Substring(offset);
-            
+
             Text(head);
 
             TextNode tailNode = new TextNode(tail, this.BaseUri);
@@ -119,7 +116,7 @@ namespace NSoup.Nodes
 
         public override void OuterHtmlHead(StringBuilder accum, int depth, OutputSettings output)
         {
-            string html = Entities.Escape(GetWholeText(), output);
+            string html = Entities.Escape(GetWholeText(), output.Encoding, output.EscapeMode);
             if (output.PrettyPrint() && ParentNode is Element && !((Element)ParentNode).PreserveWhitespace)
             {
                 html = NormaliseWhitespace(html);

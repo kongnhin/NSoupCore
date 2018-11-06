@@ -1,5 +1,4 @@
-﻿
-using NSoup.Parse;
+﻿using NSoup.Parse;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,24 +20,24 @@ namespace NSoup.Nodes
             public static readonly EscapeMode Base = new EscapeMode(_baseByVal);
             public static readonly EscapeMode Extended = new EscapeMode(_fullByVal);
 
-            private Dictionary<char, string> _map;
+            private Dictionary<string, string> _map;
 
-            private EscapeMode(Dictionary<char, string> map)
+            private EscapeMode(Dictionary<string, string> map)
             {
                 this._map = map;
             }
 
-            public Dictionary<char, string> GetMap()
+            public Dictionary<string, string> GetMap()
             {
                 return this._map;
             }
         }
 
-        private static readonly Dictionary<string, char> _full;
-        private static readonly Dictionary<char, string> _xhtmlByVal;
-        private static readonly Dictionary<string, char> _base;
-        private static readonly Dictionary<char, string> _baseByVal;
-        private static readonly Dictionary<char, string> _fullByVal;
+        private static readonly Dictionary<string, string> _multipoints;
+        private static readonly Dictionary<string, string> _xhtmlByVal;
+        private static readonly Dictionary<string, string> _base;
+        private static readonly Dictionary<string, string> _baseByVal;
+        private static readonly Dictionary<string, string> _fullByVal;
         private static readonly Regex _unescapePattern = new Regex("&(#(x|X)?([0-9a-fA-F]+)|[a-zA-Z]+\\d*);?", RegexOptions.Compiled);
         private static readonly Regex _strictUnescapePattern = new Regex("&(#(x|X)?([0-9a-fA-F]+)|[a-zA-Z]+\\d*);", RegexOptions.Compiled);
 
@@ -53,7 +52,7 @@ namespace NSoup.Nodes
         /// <returns>true if a known named entity</returns>
         public static bool IsNamedEntity(string name)
         {
-            return _full.ContainsKey(name);
+            return _multipoints.ContainsKey(name);
         }
 
         /// <summary>
@@ -71,10 +70,10 @@ namespace NSoup.Nodes
         /// Get the Character value of the named entity
         /// </summary>
         /// <param name="name">named entity (e.g. "lt" or "amp")</param>
-        /// <returns>the Character value of the named entity (e.g. '<' or '&')</returns>
-        public static char GetCharacterByName(string name)
+        /// <returns>the string value of the named entity (e.g. '<' or '&')</returns>
+        public static string GetCharacterByName(string name)
         {
-            return _full[name];
+            return _multipoints[name];
         }
 
         public static string Escape(string s, OutputSettings output)
@@ -85,8 +84,7 @@ namespace NSoup.Nodes
         public static string Escape(string s, Encoding encoding, EscapeMode escapeMode)
         {
             StringBuilder accum = new StringBuilder(s.Length * 2);
-            Dictionary<char, string> map = escapeMode.GetMap();
-
+            Dictionary<string, string> map = escapeMode.GetMap();
             for (int pos = 0; pos < s.Length; pos++)
             {
                 char c = s[pos];
@@ -99,9 +97,10 @@ namespace NSoup.Nodes
                 char[] encodingChars = new char[encoding.GetCharCount(encodingBytes)];
                 encoding.GetChars(encodingBytes, 0, encodingBytes.Length, encodingChars, 0); // Convert target encoding bytes into chars.
 
-                if (map.ContainsKey(c))
+                string characters = c.ToString();
+                if (map.ContainsKey(characters))
                 {
-                    accum.AppendFormat("&{0};", map[c]);
+                    accum.AppendFormat("&{0};", map[characters]);
                 }
                 else if (encodingChars[0] == c)
                 {
@@ -144,22 +143,23 @@ namespace NSoup.Nodes
 
         static Entities()
         {
-            _xhtmlByVal = new Dictionary<char, string>(xhtmlArray.Length);
-            _base = LoadEntities("NSoup.Nodes.entities-base.txt");
+            _xhtmlByVal = new Dictionary<string, string>(xhtmlArray.Length);
+            _base = Load("NSoup.Nodes.entities-base.txt");
             _baseByVal = ToCharacterKey(_base);
-            _full = LoadEntities("NSoup.Nodes.entities-full.txt");
-            _fullByVal = ToCharacterKey(_full);
+            _multipoints = Load("NSoup.Nodes.entities-full.txt");
+            _fullByVal = ToCharacterKey(_multipoints);
 
             for (int i = 0; i < xhtmlArray.Length / 2; i++)
             {
-                char c = (char)(int)xhtmlArray[i, 1];
+                //char c = (char)(int)xhtmlArray[i, 1];
+                string c = Char.ConvertFromUtf32((int)xhtmlArray[i, 1]);
                 _xhtmlByVal[c] = ((string)xhtmlArray[i, 0]);
             }
         }
 
-        private static Dictionary<string, char> LoadEntities(string resourceName)
+        private static Dictionary<string, string> Load(string resourceName)
         {
-            Dictionary<string, char> entities = new Dictionary<string, char>();
+            Dictionary<string, string> entities = new Dictionary<string, string>();
 
             var assembly = typeof(Entities).GetTypeInfo().Assembly;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
@@ -176,8 +176,7 @@ namespace NSoup.Nodes
                     if (!string.IsNullOrEmpty(line))
                     {
                         parts = line.Split('=');
-
-                        entities.Add(parts[0], (char)Convert.ToInt32(parts[1], 16));
+                        entities.Add(parts[0], Char.ConvertFromUtf32(Convert.ToInt32(parts[1], 16)));
                     }
                 }
             }
@@ -185,12 +184,12 @@ namespace NSoup.Nodes
             return entities;
         }
 
-        private static Dictionary<char, string> ToCharacterKey(Dictionary<string, char> inMap)
+        private static Dictionary<string, string> ToCharacterKey(Dictionary<string, string> inMap)
         {
-            Dictionary<char, string> outMap = new Dictionary<char, string>();
-            foreach (KeyValuePair<string, char> entry in inMap)
+            Dictionary<string, string> outMap = new Dictionary<string, string>();
+            foreach (KeyValuePair<string, string> entry in inMap)
             {
-                char character = entry.Value;
+                string character = entry.Value;
                 string name = entry.Key;
 
                 if (outMap.ContainsKey(character))

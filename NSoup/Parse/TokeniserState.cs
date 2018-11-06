@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NSoup.Parse
+﻿namespace NSoup.Parse
 {
     /**
      * States and Transition activations for the Tokeniser.
@@ -44,7 +39,7 @@ namespace NSoup.Parse
             // from & in data
             public override void Read(Tokeniser t, CharacterReader r)
             {
-                char? c = t.ConsumeCharacterReference(null, false);
+                string c = t.ConsumeCharacterReference(null, false);
 
                 if (c == null)
                 {
@@ -52,7 +47,7 @@ namespace NSoup.Parse
                 }
                 else
                 {
-                    t.Emit(c.Value);
+                    t.Emit(c);
                 }
 
                 t.Transition(Data);
@@ -90,14 +85,14 @@ namespace NSoup.Parse
         {
             public override void Read(Tokeniser t, CharacterReader r)
             {
-                char? c = t.ConsumeCharacterReference(null, false);
+                string c = t.ConsumeCharacterReference(null, false);
                 if (c == null)
                 {
                     t.Emit('&');
                 }
                 else
                 {
-                    t.Emit(c.Value);
+                    t.Emit(c);
                 }
                 t.Transition(RcData);
             }
@@ -236,10 +231,11 @@ namespace NSoup.Parse
             public override void Read(Tokeniser t, CharacterReader r)
             {
                 // previous TagOpen state did NOT Consume, will have a letter char in current
-                string tagName = r.ConsumeToAny('\t', '\n', '\r', '\f', ' ', '/', '>', _nullChar).ToLowerInvariant();
+                string tagName = r.ConsumeToAny('\t', '\n', '\r', '\f', ' ', '/', '>', '<', _nullChar).ToLowerInvariant();
                 t.TagPending.AppendTagName(tagName);
+                char c = r.Consume();
 
-                switch (r.Consume())
+                switch (c)
                 {
                     case '\t':
                     case '\n':
@@ -255,6 +251,11 @@ namespace NSoup.Parse
                         t.EmitTagPending();
                         t.Transition(Data);
                         break;
+                    case '<':
+                        t.Error(this);
+                        r.Unconsume();
+                        t.TagPending.AppendTagName(c);
+                        break;
                     case _nullChar: // replacement
                         t.TagPending.AppendTagName(_replacementStr);
                         break;
@@ -262,7 +263,9 @@ namespace NSoup.Parse
                         t.EofError(this);
                         t.Transition(Data);
                         break;
-                    // no default, as covered with above ConsumeToAny
+                    default:
+                        t.TagPending.AppendTagName(c);
+                        break;
                 }
             }
         };
@@ -369,6 +372,7 @@ namespace NSoup.Parse
             private void AnythingElse(Tokeniser t, CharacterReader r)
             {
                 t.Emit("</" + t.DataBuffer.ToString());
+                r.Unconsume();
                 t.Transition(RcData);
             }
         };
@@ -722,7 +726,7 @@ namespace NSoup.Parse
                     string name = r.ConsumeLetterSequence();
                     t.TagPending.AppendTagName(name.ToLowerInvariant());
                     t.DataBuffer.Append(name);
-                    
+
                     return;
                 }
 
@@ -1043,7 +1047,7 @@ namespace NSoup.Parse
                         t.Error(this);
                         t.TagPending.AppendAttributeName(c);
                         break;
-                    // no default, as covered in ConsumeToAny
+                        // no default, as covered in ConsumeToAny
                 }
             }
         };
@@ -1165,10 +1169,10 @@ namespace NSoup.Parse
                         t.Transition(AfterAttributeValueQuoted);
                         break;
                     case '&':
-                        char? reference = t.ConsumeCharacterReference('"', true);
+                        string reference = t.ConsumeCharacterReference('"', true);
                         if (reference != null)
                         {
-                            t.TagPending.AppendAttributeValue(reference.Value);
+                            t.TagPending.AppendAttributeValue(reference);
                         }
                         else
                         {
@@ -1183,7 +1187,7 @@ namespace NSoup.Parse
                         t.EofError(this);
                         t.Transition(Data);
                         break;
-                    // no default, handled in Consume to any above
+                        // no default, handled in Consume to any above
                 }
             }
         };
@@ -1204,10 +1208,10 @@ namespace NSoup.Parse
                         t.Transition(AfterAttributeValueQuoted);
                         break;
                     case '&':
-                        char? reference = t.ConsumeCharacterReference('\'', true);
+                        string reference = t.ConsumeCharacterReference('\'', true);
                         if (reference != null)
                         {
-                            t.TagPending.AppendAttributeValue(reference.Value);
+                            t.TagPending.AppendAttributeValue(reference);
                         }
                         else
                         {
@@ -1222,7 +1226,7 @@ namespace NSoup.Parse
                         t.EofError(this);
                         t.Transition(Data);
                         break;
-                    // no default, handled in Consume to any above
+                        // no default, handled in Consume to any above
                 }
             }
         };
@@ -1247,10 +1251,10 @@ namespace NSoup.Parse
                         t.Transition(BeforeAttributeName);
                         break;
                     case '&':
-                        char? reference = t.ConsumeCharacterReference('>', true);
+                        string reference = t.ConsumeCharacterReference('>', true);
                         if (reference != null)
                         {
-                            t.TagPending.AppendAttributeValue(reference.Value);
+                            t.TagPending.AppendAttributeValue(reference);
                         }
                         else
                         {
@@ -1277,7 +1281,7 @@ namespace NSoup.Parse
                         t.Error(this);
                         t.TagPending.AppendAttributeValue(c);
                         break;
-                    // no default, handled in Consume to any above
+                        // no default, handled in Consume to any above
                 }
 
             }
@@ -1334,6 +1338,7 @@ namespace NSoup.Parse
                         break;
                     default:
                         t.Error(this);
+                        r.Unconsume();
                         t.Transition(BeforeAttributeName);
                         break;
                 }
@@ -2119,7 +2124,7 @@ namespace NSoup.Parse
                         t.Error(this);
                         t.Transition(BogusDoctype);
                         break;
-                    // NOT force quirks
+                        // NOT force quirks
                 }
             }
         };

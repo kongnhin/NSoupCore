@@ -1,7 +1,7 @@
-**NSoup for .NET Core 1.1 is not fully tested.**
+**NSoup for .NET Standard 2.0 is fully tested.**
 
 # NSoupCore
-NSoupCore is a C# .NET Core 1.1 port of the jsoup (https://github.com/jhy/jsoup) HTML parser and sanitizer originally written in Java.
+NSoupCore is a C# .NET Standard 2.0 port of the jsoup (https://github.com/jhy/jsoup) HTML parser and sanitizer originally written in Java.
 
 jsoup originally written by [Jonathan Hedley](https://github.com/jhy).
 
@@ -14,11 +14,3 @@ Ported to .NET Core by Justin Kirk
 - jQuery-like CSS selectors for finding and extracting data from HTML pages.
 - Sanitize HTML sent from untrusted sources.
 - Manipulate HTML documents.
-
-## Installation
-
-To install NSoupCore, run the following command in [NuGet Package Manager Console](http://docs.nuget.org/docs/start-here/using-the-package-manager-console).
-
-```
-PM> Install-Package NSoupCore
-```

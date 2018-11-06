@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using NSoup.Nodes;
+using System;
 using System.Text;
-using NSoup.Nodes;
 
 namespace NSoup.Parse
 {
 
-/// <summary>
-/// Readers the input stream into tokens.
-/// </summary>
+    /// <summary>
+    /// Readers the input stream into tokens.
+    /// </summary>
     public class Tokeniser
     {
         public const char ReplacementChar = '\uFFFD'; // replaces null character
@@ -127,7 +125,7 @@ namespace NSoup.Parse
             _selfClosingFlagAcknowledged = true;
         }
 
-        public char? ConsumeCharacterReference(char? additionalAllowedCharacter, bool inAttribute)
+        public string ConsumeCharacterReference(char? additionalAllowedCharacter, bool inAttribute)
         {
             if (_reader.IsEmpty())
             {
@@ -175,13 +173,13 @@ namespace NSoup.Parse
                 if (charval == -1 || (charval >= 0xD800 && charval <= 0xDFFF) || charval > 0x10FFFF)
                 {
                     CharacterReferenceError("Character outside of valid range");
-                    return ReplacementChar;
+                    return null;
                 }
                 else
                 {
                     // todo: implement number replacement table
                     // todo: check for extra illegal unicode points as parse errors
-                    return (char)charval;
+                    return Char.ConvertFromUtf32(charval);
                 }
             }
             else
@@ -302,7 +300,7 @@ namespace NSoup.Parse
             }
         }
 
-        private void Error(string errorMsg)
+        public void Error(string errorMsg)
         {
             if (_errors.CanAddError)
             {
@@ -332,7 +330,7 @@ namespace NSoup.Parse
                 if (_reader.Matches('&'))
                 {
                     _reader.Consume();
-                    char? c = ConsumeCharacterReference(null, inAttribute);
+                    string c = ConsumeCharacterReference(null, inAttribute);
                     if (c == null)
                     {
                         builder.Append('&');
